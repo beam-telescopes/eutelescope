@@ -39,7 +39,7 @@
   <!-- compression of output file 0: false >0: true (default) -->
   <parameter name="Compress" type="int" value="1"/>
   <!-- filename without extension-->
-  <parameter name="FileName" type="string" value="@HistogramPath@/@FilePrefix@-aligngbl-histo"/>
+  <parameter name="FileName" type="string" value="@HistogramPath@/@FilePrefix@@FileSuffix@_histo"/>
   <!-- type of output file root (default) or xml )-->
   <parameter name="FileType" type="string" value="root"/>
   <!--verbosity level of this processor ("DEBUG0-4,MESSAGE0-4,WARNING0-4,ERROR0-4,SILENT")-->
@@ -115,7 +115,7 @@
   <!--x-resolution of sensors (z-ordered) [mm]-->
   <parameter name="resolutionX" type="FloatVec"> @ResolutionX@  </parameter>
   <!--y-resolution of sensors (z-ordered) [mm]-->
-  <parameter name="resolutionY" type="FloatVec"> @ResolutionX@  </parameter>
+  <parameter name="resolutionY" type="FloatVec"> @ResolutionY@  </parameter>
   <!--Upstream-downstream triplet matching cut [mm]-->
   <parameter name="tripletsMatchingCut" type="double"> @TripletMatchingCut@ </parameter>
   <!--The three sensors used as the upstream triplet-->
@@ -140,7 +140,7 @@
   <!--Fix sensor planes in the fit according to their sensor ids.-->
   <!--parameter name="FixedPlanes" type="IntVec"> </parameter-->
   <!--Suffix for the new GEAR file, set to empty string (this is not default!) to overwrite old GEAR file-->
-  <parameter name="NewGEARSuffix" type="string">_aligned </parameter>
+  <parameter name="NewGEARSuffix" type="string"> @FileSuffix@ </parameter>
   <!--Name of the steering file for the pede program.-->
   <!--parameter name="PedeSteerfileName" type="string">steer_mille.txt </parameter-->
   <!--Apply the obtained rotation to the preexisting offset vector or not..-->

@@ -73,7 +73,7 @@
   <!--This is the name of the LCIO file name with the output noisyPixel db (add .slcio)-->
   <parameter name="HotPixelDBFile" type="string" value="@DatabasePath@/run@HotPixelRunNumber@-hotpixel-m26-db.slcio"/>
   <!--This float number [0,1] represents the maximum allowed firing frequency within the selected number of event per cycle-->
-  <parameter name="MaxAllowedFiringFreq" type="float" value="0.001"/>
+  <parameter name="MaxAllowedFiringFreq" type="float" value="@FiringFreq@"/>
   <!--The number of events to be considered for each update cycle-->
   <parameter name="NoOfEvents" type="int" value="49999"/>
   <!--Bin count for noisy pixel count versus noise cut histogram-->
