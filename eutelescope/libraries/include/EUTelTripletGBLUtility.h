@@ -141,10 +141,10 @@ public:
         }
     };
 
-    class triplet {
+   class multiplet {
     public:
-        triplet();
-        triplet(hit hit0, hit hit1, hit hit2);
+        multiplet();
+        multiplet(std::vector<hit> hits);
 
         // Keep track of linking status to DUT and REF:
         bool linked_dut;
@@ -188,21 +188,44 @@ public:
         //! Returning the slope of the triplet (x,y):
         hit slope() const;
 
-        friend std::ostream& operator << (std::ostream& out, triplet trip)
+        friend std::ostream& operator << (std::ostream& out, multiplet multip)
         {
-            out << "Triplet: " << std::endl;
-            for( std::map<unsigned int,hit>::iterator itr = trip.hits.begin(); itr != trip.hits.end(); itr++) {
+            out << "Multiplet: " << std::endl;
+            for( std::map<unsigned int,hit>::iterator itr = multip.hits.begin(); itr != multip.hits.end(); itr++) {
                 out << "    " << itr->second << std::endl;
             }
             return out;
         };
-
-    private:
-        void filltriplet(hit hit0, hit hit1, hit hit2) {
-            hits.insert( std::pair<unsigned int,hit>(hit0.plane,hit0));
-            hits.insert( std::pair<unsigned int,hit>(hit1.plane,hit1));
-            hits.insert( std::pair<unsigned int,hit>(hit2.plane,hit2));
+        
+        //! Will add a hit to this multiplet - bool will tell whether to add it to the DUT planes or the others
+        inline void add_hit(hit new_hit, bool isDUT=false) {
+            if(isDUT) DUThits.insert( std::pair<unsigned int, hit> (new_hit.plane, new_hit) );
+            else hits.insert( std::pair<unsigned int, hit> (new_hit.plane, new_hit) );
         };
+        
+        //! Will remove a hit from this multiplet - bool will tell whether to add it to the DUT planes or the others
+        inline EUTelTripletGBLUtility::hit rm_hit(int hit_position=1, bool isDUT=false) {
+            if(isDUT) {
+                auto res = DUThits[id];
+                DUThits.erase( DUThits.begin() + 1 );
+                return res;
+            } else {
+                auto res = hits[id];
+                hits.insert( hits.begin() + 1 );
+                return res;
+            }
+        };
+        
+        inline int nb_hits() { return hits->size() };
+        inline int nb_DUThits() { return DUThits.size() };
+        
+   protected:
+        void fillmultiplet(std::vector<hit> inHits) {
+            for(auto current : inHits) 
+                hits.insert( std::pair<unsigned int,hit>(current.plane,current));
+        };
+        
+    private:
         //! The hits belonging to the triplet:
         /* Use map since it's already ordered according to plane IDs.
          * We rely on begin() and rbegin() to deliver pointers to the first and last plane of the triplet.
@@ -235,6 +258,11 @@ public:
 
     };
 
+    class triplet : public multiplet {
+    public:
+        triplet(hit hit0, hit hit1, hit hit2);
+    };
+    
     class track {
     public:
         //! Default Track constructor. To be called with two triplets.
@@ -279,16 +307,24 @@ public:
      */
     template<typename T>
     void FindTriplets(std::vector<EUTelTripletGBLUtility::hit> const & hits, T const & triplet_sensor_ids, double trip_res_cut, double trip_slope_cut, std::vector<EUTelTripletGBLUtility::triplet> & found_trip, bool only_best_triplet = true, bool upstream = true);
+    
+    EUTelTripletGBLUtility::multiplet RecursiveMultipletBuilding(EUTelTripletGBLUtility::multiplet current_multiplet, std::vector<EUTelTripletGBLUtility::hit> in_hits);
+
+    template<typename T>
+    void FindMultiplets(std::vector<EUTelTripletGBLUtility::hit> const & hits, T const & multiplet_sensor_ids, double multip_res_cut, double multip_slope_cut, std::vector<EUTelTripletGBLUtility::multiplet> & found_trip, bool only_best_multiplet = true);
 
     //! Match the upstream and downstream triplets to tracks
     void MatchTriplets(std::vector<EUTelTripletGBLUtility::triplet> const & up, std::vector<EUTelTripletGBLUtility::triplet> const & down, double z_match, double trip_matching_cut, std::vector<EUTelTripletGBLUtility::track> &track);
 
-    bool AttachDUT(EUTelTripletGBLUtility::triplet & triplet, std::vector<EUTelTripletGBLUtility::hit> const & hits, unsigned int dutID,  std::vector<float> dist_cuts);
+    bool AttachDUT(EUTelTripletGBLUtility::multiplet & multiplet, std::vector<EUTelTripletGBLUtility::hit> const & hits, unsigned int dutID,  std::vector<float> dist_cuts);
 
     //bool AttachDUT(std::vector<EUTelTripletGBLUtility::triplet> & triplets, std::vector<EUTelTripletGBLUtility::hit> const & hits, unsigned int dutIDs, double trip_res_cut, double trip_slope_cut);
 
     //! Check isolation of triplet within vector of triplets
-    bool IsTripletIsolated(EUTelTripletGBLUtility::triplet const & it, std::vector<EUTelTripletGBLUtility::triplet> const &trip, double z_match, double isolation = 0.3);
+    bool IsMultipletIsolated(EUTelTripletGBLUtility::multiplet it, std::vector<EUTelTripletGBLUtility::multiplet> trip, double z_match, double isolation = 0.3);
+
+    //! Check isolation of triplet within vector of triplets
+    bool IsTripletIsolated(EUTelTripletGBLUtility::triplet it, std::vector<EUTelTripletGBLUtility::triplet> trip, double z_match, double isolation = 0.3);
 
     //! Calculate efficiency of plane
     /*! This creates non-standard triplets and driplets (use only 5 planes to contruct them) and looks for matching hit on plane under test
@@ -303,7 +339,7 @@ public:
      *
      * returns double average efficiency
      */
-    double PlaneEfficiency(std::vector<EUTelTripletGBLUtility::triplet> &up, std::vector<EUTelTripletGBLUtility::triplet> &down, std::vector<EUTelTripletGBLUtility::hit> &hits, unsigned int PUT, double track_match_z, double DUT_z, double match_cut, double eff_radius, std::vector<AIDA::IProfile1D*> &profile);
+    double PlaneEfficiency(std::vector<EUTelTripletGBLUtility::multiplet> &up, std::vector<EUTelTripletGBLUtility::multiplet> &down, std::vector<EUTelTripletGBLUtility::hit> &hits, unsigned int PUT, double track_match_z, double DUT_z, double match_cut, double eff_radius, std::vector<AIDA::IProfile1D*> &profile);
 
 private:
 
