@@ -127,7 +127,7 @@ std::vector<eutelescope::EUTelTripletGBLUtility::multiplet> EUTelTripletGBLUtili
 template<typename T>
 void EUTelTripletGBLUtility::FindMultiplets(std::vector<EUTelTripletGBLUtility::hit> const & hits, std::vector<T> const & multiplet_sensor_ids, double multip_res_cut, double multip_slope_cut, std::vector<EUTelTripletGBLUtility::multiplet> & found_multip, bool only_best_multiplet) {
 
-  vector<unsigned> planes;
+  std::vector<unsigned> planes;
   for(unsigned current = 0 ; current < multiplet_sensor_ids.size() ; current++) 
     planes.push_back( static_cast<unsigned> (multiplet_sensor_ids[current]) );
     
