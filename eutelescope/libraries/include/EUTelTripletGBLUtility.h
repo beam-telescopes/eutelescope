@@ -216,8 +216,11 @@ public:
             }
         };
         
-        inline int nb_hits() { return hits->size() };
-        inline int nb_DUThits() { return DUThits.size() };
+        inline int nb_Hits() { 
+            int tmp = (&hits)->size();
+            return tmp;
+        };
+        inline int nb_DUThits() { return DUThits.size(); };
         
    protected:
         void fillmultiplet(std::vector<hit> inHits) {
@@ -308,7 +311,7 @@ public:
     template<typename T>
     void FindTriplets(std::vector<EUTelTripletGBLUtility::hit> const & hits, T const & triplet_sensor_ids, double trip_res_cut, double trip_slope_cut, std::vector<EUTelTripletGBLUtility::triplet> & found_trip, bool only_best_triplet = true, bool upstream = true);
     
-    EUTelTripletGBLUtility::multiplet RecursiveMultipletBuilding(EUTelTripletGBLUtility::multiplet current_multiplet, std::vector<EUTelTripletGBLUtility::hit> in_hits);
+    std::vector<EUTelTripletGBLUtility::multiplet> RecursiveMultipletBuilding(std::vector<EUTelTripletGBLUtility::multiplet> &current_multiplets, std::vector< std::vector<EUTelTripletGBLUtility::hit> >& in_hits);
 
     template<typename T>
     void FindMultiplets(std::vector<EUTelTripletGBLUtility::hit> const & hits, T const & multiplet_sensor_ids, double multip_res_cut, double multip_slope_cut, std::vector<EUTelTripletGBLUtility::multiplet> & found_trip, bool only_best_multiplet = true);
