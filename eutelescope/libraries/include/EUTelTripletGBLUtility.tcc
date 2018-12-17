@@ -88,7 +88,7 @@ void EUTelTripletGBLUtility::FindTriplets(std::vector<EUTelTripletGBLUtility::hi
     * current_multiplets : current set of the multiplets built with the already used planes
     * in_hits : all hits in the telescope for this event. The two indices are [ID plane][ID hits on the plane]
     ******/
-std::vector<eutelescope::EUTelTripletGBLUtility::multiplet> RecursiveMultipletBuilding(std::vector<eutelescope::EUTelTripletGBLUtility::multiplet> &current_multiplets, std::vector< std::vector<eutelescope::EUTelTripletGBLUtility::hit> >& in_hits)
+std::vector<eutelescope::EUTelTripletGBLUtility::multiplet> EUTelTripletGBLUtility::RecursiveMultipletBuilding(std::vector<eutelescope::EUTelTripletGBLUtility::multiplet> &current_multiplets, std::vector< std::vector<eutelescope::EUTelTripletGBLUtility::hit> >& in_hits)
 {
 
     if(in_hits.size() == 2) { //Initial condition
