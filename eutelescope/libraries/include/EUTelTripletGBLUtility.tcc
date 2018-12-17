@@ -84,19 +84,43 @@ void EUTelTripletGBLUtility::FindTriplets(std::vector<EUTelTripletGBLUtility::hi
   //return triplets;
 }
 
-EUTelTripletGBLUtility::multiplet RecursiveMultipletBuilding(EUTelTripletGBLUtility::multiplet current_multiplet, std::vector< std::vector<EUTelTripletGBLUtility::hit> >& in_hits)
+/********* 
+    * current_multiplets : current set of the multiplets built with the already used planes
+    * in_hits : all hits in the telescope for this event. The two indices are [ID plane][ID hits on the plane]
+    ******/
+std::vector<EUTelTripletGBLUtility::multiplet> RecursiveMultipletBuilding(std::vector<EUTelTripletGBLUtility::multiplet> &current_multiplets, std::vector< std::vector<EUTelTripletGBLUtility::hit> >& in_hits)
 {
 
-    if(in_hits.size() == 2) {
-        EUTelTripletGBLUtility::multiplet out_multiplet;
-        out_multiplet.fillmutliplet(in_hits);
-        return out_multiplet;
-    } else {
-        EUTelTripletGBLUtility::multiplet helper_multiplet(in_hits);
-        EUTelTripletGBLUtility::hit current_hit = in_hits.at(1);
+    if(in_hits.size() == 2) { //Initial condition
+        std::vector<EUTelTripletGBLUtility::hit> all_hits_p0 = in_hits.at(0);
+        std::vector<EUTelTripletGBLUtility::hit> all_hits_p1 = in_hits.at(1);
+        std::vector<EUTelTripletGBLUtility::multiplet> all_output_multiplets;
+        
+        for(EUTelTripletGBLUtility::hit hit_p0 : in_hits.at(0)) 
+        for(EUTelTripletGBLUtility::hit hit_p1 : in_hits.at(1))
+        {
+            EUTelTripletGBLUtility::multiplet out_multiplet;
+            std::vector<EUTelTripletGBLUtility::hit> current_multiplet_hits;
+            current_multiplet_hits.push_back(hit_p0);
+            current_multiplet_hits.push_back(hit_p1);
+            //--- TODO: Add some cuts here !
+            out_multiplet.fillmutliplet(current_multiplet_hits);
+            all_output_multiplets.push_back(current_multiplet_hits);
+        }
+        return all_output_multiplets;
+    } else { //Recursivityzation
+        std::vector<EUTelTripletGBLUtility::hit> current_plane_hits = in_hits.at(1);
         in_hits.erase(in_hits.begin() + 1);
             
-        EUTelTripletGBLUtility::multiplet sub_multiplet = 
+        std::vector<EUTelTripletGBLUtility::multiplet> sub_multiplet = RecursiveMultipletBuilding(current_multiplets, in_hits);
+        
+        for(EUTelTripletGBLUtility::hit current_hit : current_plane_hits)
+        for(EUTelTripletGBLUtility::multiplet current_build_multiplet : sub_multiplet)
+        {
+            current_build_multiplet.add_hit(current_hit);
+            //--- TODO : Add some cuts here
+            //--- TODO Maybe : Add an option to check whether a plane is DUT ?
+        }
     }
 }
 
