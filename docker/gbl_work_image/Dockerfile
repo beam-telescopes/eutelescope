@@ -25,9 +25,8 @@ RUN chmod +x build_env.sh
 RUN source build_env.sh && cd build && cmake .. && cmake --build . -- -j$(nproc) && make install
 #make clean && make install
 
-
 WORKDIR /ilcsoft/v01-19-02/Eutelescope/master/jobsub/examples/mixed-mode
-ADD config_dup.cfg duplicated/config.cfg
-ADD config_std.cfg standard/config.cfg
+#ADD config_dup.cfg duplicated/config.cfg
+#ADD config_std.cfg standard/config.cfg
 
 CMD bash -c " cd /ilcsoft/v01-19-02/Eutelescope/master/ ; source build_env.sh ; cd - ; bash"
