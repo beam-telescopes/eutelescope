@@ -311,7 +311,7 @@ public:
     template<typename T>
     void FindTriplets(std::vector<EUTelTripletGBLUtility::hit> const & hits, T const & triplet_sensor_ids, double trip_res_cut, double trip_slope_cut, std::vector<EUTelTripletGBLUtility::triplet> & found_trip, bool only_best_triplet = true, bool upstream = true);
     
-    std::vector<EUTelTripletGBLUtility::multiplet> RecursiveMultipletBuilding(std::vector<EUTelTripletGBLUtility::multiplet> &current_multiplets, std::vector< std::vector<EUTelTripletGBLUtility::hit> >& in_hits);
+    std::vector<eutelescope::EUTelTripletGBLUtility::multiplet> RecursiveMultipletBuilding(std::vector<eutelescope::EUTelTripletGBLUtility::multiplet> &current_multiplets, std::vector< std::vector<eutelescope::EUTelTripletGBLUtility::hit> >& in_hits);
 
     template<typename T>
     void FindMultiplets(std::vector<EUTelTripletGBLUtility::hit> const & hits, T const & multiplet_sensor_ids, double multip_res_cut, double multip_slope_cut, std::vector<EUTelTripletGBLUtility::multiplet> & found_trip, bool only_best_multiplet = true);
