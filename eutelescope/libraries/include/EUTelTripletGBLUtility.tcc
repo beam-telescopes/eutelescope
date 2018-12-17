@@ -104,7 +104,7 @@ std::vector<EUTelTripletGBLUtility::multiplet> RecursiveMultipletBuilding(std::v
             current_multiplet_hits.push_back(hit_p0);
             current_multiplet_hits.push_back(hit_p1);
             //--- TODO: Add some cuts here !
-            out_multiplet.fillmutliplet(current_multiplet_hits);
+            out_multiplet.fillmultiplet(current_multiplet_hits);
             all_output_multiplets.push_back(current_multiplet_hits);
         }
         return all_output_multiplets;
