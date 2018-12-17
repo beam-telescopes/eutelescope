@@ -206,12 +206,12 @@ public:
         //! Will remove a hit from this multiplet - bool will tell whether to add it to the DUT planes or the others
         inline EUTelTripletGBLUtility::hit rm_hit(int hit_position=1, bool isDUT=false) {
             if(isDUT) {
-                auto res = DUThits[id];
-                DUThits.erase( DUThits.begin() + 1 );
+                EUTelTripletGBLUtility::hit res = DUThits[hit_position];
+                DUThits.erase( DUThits.find(hit_position) );
                 return res;
             } else {
-                auto res = hits[id];
-                hits.insert( hits.begin() + 1 );
+                EUTelTripletGBLUtility::hit res = hits[hit_position];
+                hits.erase( hits.find(hit_position) );
                 return res;
             }
         };
