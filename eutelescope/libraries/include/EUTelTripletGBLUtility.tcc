@@ -121,90 +121,29 @@ std::vector<eutelescope::EUTelTripletGBLUtility::multiplet> EUTelTripletGBLUtili
             //--- TODO : Add some cuts here
             //--- TODO Maybe : Add an option to check whether a plane is DUT ?
         }
+        
+        return sub_multiplet;
     }
 }
 
 template<typename T>
-void EUTelTripletGBLUtility::FindMultiplets(std::vector<EUTelTripletGBLUtility::hit> const & hits, std::vector<T> const & multiplet_sensor_ids, double multip_res_cut, double multip_slope_cut, std::vector<EUTelTripletGBLUtility::multiplet> & found_multip, bool only_best_multiplet) {
-
+void EUTelTripletGBLUtility::FindMultiplets(std::vector<EUTelTripletGBLUtility::hit> const & hits, std::vector<T> const & multiplet_sensor_ids, double multip_res_cut, double multip_slope_cut, std::vector<EUTelTripletGBLUtility::multiplet> & found_multip, bool only_best_multiplet) 
+{
   std::vector<unsigned> planes;
   for(unsigned current = 0 ; current < multiplet_sensor_ids.size() ; current++) 
     planes.push_back( static_cast<unsigned> (multiplet_sensor_ids[current]) );
     
   std::vector< std::vector<EUTelTripletGBLUtility::hit> > hits_by_plane;
-  for(auto current_plane : planes) 
-    for(auto current_hit : hits) 
-      if(current_hit.plane == current_plane) hits_by_plane.push_back(current_hit);
+  for(auto current_plane : planes) {
+      hits_by_plane.push_back( std::vector<EUTelTripletGBLUtility::hit> () );
+      for(auto current_hit : hits) {
+          if(current_hit.plane == current_plane) hits_by_plane.back().push_back(current_hit);
+      }
+    }
 
-  // get all hit is plane = plane0
-  for( auto& ihit: hits ){
-    if( ihit.plane != plane0 ) continue; // First plane
-
-    // get all hit is plane = plane2
-    for( auto& jhit: hits ){
-      if( jhit.plane != plane2 ) continue; // Last plane
-
-      double sum_res_old = -1.;
-      // get all hit is plane = plane1
-      for( auto& khit: hits ){
-	if( khit.plane != plane1 ) continue; // Middle plane
-
-	// Create new preliminary triplet from the three hits:
-	EUTelTripletGBLUtility::triplet new_triplet(ihit,khit,jhit);
-
-    //Create triplet slope plots
-    if(upstream == 1){
-		upstreamTripletSlopeX->fill(new_triplet.getdx()*1E3/new_triplet.getdz()); //factor 1E3 to convert from rad to mrad. To be checked
-		upstreamTripletSlopeY->fill(new_triplet.getdy()*1E3/new_triplet.getdz());
-	} else {
-		downstreamTripletSlopeX->fill(new_triplet.getdx()*1E3/new_triplet.getdz());
-		downstreamTripletSlopeY->fill(new_triplet.getdy()*1E3/new_triplet.getdz());
-	}
-	// Setting cuts on the triplet track angle:
-	if( fabs(new_triplet.getdx()) > slope_cut * new_triplet.getdz()) continue;
-	if( fabs(new_triplet.getdy()) > slope_cut * new_triplet.getdz()) continue;
-    
-    //Create triplet residual plots
-    if(upstream == 1){
-		upstreamTripletResidualX->fill(new_triplet.getdx(plane1));
-		upstreamTripletResidualY->fill(new_triplet.getdy(plane1));
-	} else {
-		downstreamTripletResidualX->fill(new_triplet.getdx(plane1));
-		downstreamTripletResidualY->fill(new_triplet.getdy(plane1));
-	}
-	// Setting cuts on the triplet residual on the middle plane
-	if( fabs(new_triplet.getdx(plane1)) > trip_res_cut) continue;
-	if( fabs(new_triplet.getdy(plane1)) > trip_res_cut) continue;
-
-    // Edo: This (best triplets) is hardcoded as false in EUTelAlignGBL. Is this really useful?
-    if(only_best_triplet) {
-		// For low threshold (high noise) and/or high occupancy, use only the triplet with the smallest sum of residuals on plane1
-		double sum_res = sqrt(new_triplet.getdx(plane1)*new_triplet.getdx(plane1) + new_triplet.getdy(plane1)*new_triplet.getdy(plane1));
-		if(sum_res < sum_res_old){
-	
-		  // Remove the last one since it fits worse, not if its the first
-		  found_triplets.pop_back();
-		  // The triplet is accepted, push it back:
-		  found_triplets.emplace_back(new_triplet);
-		  streamlog_out(DEBUG2) << new_triplet;
-		  sum_res_old = sum_res;
-		}
-
-		// update sum_res_old on first iteration
-		if(sum_res_old < 0.) {
-		  // The triplet is accepted, push it back:
-		  found_triplets.emplace_back(new_triplet);
-		  streamlog_out(DEBUG2) << new_triplet;
-		  sum_res_old = sum_res;
-		}
-	} else {	
-		found_triplets.emplace_back(new_triplet);
-	}
-      }//loop over hits
-    }//loop over hits
-  }// loop over hits
-
-  //return triplets;
+    std::vector<EUTelTripletGBLUtility::multiplet> tmp;
+  found_multip = RecursiveMultipletBuilding(tmp, hits_by_plane);
+  //return multiplets;
 }
 
 }//namespace
