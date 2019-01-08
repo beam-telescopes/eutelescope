@@ -26,7 +26,14 @@ RUN source build_env.sh && cd build && cmake .. && cmake --build . -- -j$(nproc)
 #make clean && make install
 
 WORKDIR /ilcsoft/v01-19-02/Eutelescope/master/jobsub/examples/mixed-mode
-#ADD config_dup.cfg duplicated/config.cfg
-#ADD config_std.cfg standard/config.cfg
+RUN sed -i 's/\/afs\/desy/\/dummy\/desy/g' duplicated/config.cfg
+RUN sed -i 's/\/afs\/desy/\/dummy\/desy/g' standard/config.cfg
+
+RUN mkdir /afs /output /dummy
+RUN chmod +rwx /
+RUN chmod +rwx /afs
+RUN chmod +rwx /output
+RUN chmod +rwx /dummy
+
 
 CMD bash -c " cd /ilcsoft/v01-19-02/Eutelescope/master/ ; source build_env.sh ; cd - ; bash"
