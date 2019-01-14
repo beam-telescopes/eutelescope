@@ -25,9 +25,12 @@ RUN chmod +x build_env.sh
 RUN source build_env.sh && cd build && cmake .. && cmake --build . -- -j$(nproc) && make install
 #make clean && make install
 
-WORKDIR /ilcsoft/v01-19-02/Eutelescope/master/jobsub/examples/mixed-mode
-RUN sed -i 's/\/afs\/desy/\/dummy\/desy/g' duplicated/config.cfg
-RUN sed -i 's/\/afs\/desy/\/dummy\/desy/g' standard/config.cfg
+WORKDIR /ilcsoft/v01-19-02/Eutelescope/master/jobsub/examples/
+RUN sed -i 's/\/afs\/desy/\/dummy\/desy/g' mixed-mode/duplicated/config.cfg
+RUN sed -i 's/\/afs\/desy/\/dummy\/desy/g' mixed-mode/standard/config.cfg
+RUN sed -i 's/\/afs\/desy/\/dummy\/desy/g' GBL_noDUT/*.cfg
+RUN sed -i 's/\/afs\/desy/\/dummy\/desy/g' GBL_SUT/*.cfg
+RUN sed -i 's/\/afs\/desy/\/dummy\/desy/g' GBL_DUT/*.cfg
 
 RUN mkdir /afs /output /dummy
 RUN chmod +rwx /
@@ -35,5 +38,6 @@ RUN chmod +rwx /afs
 RUN chmod +rwx /output
 RUN chmod +rwx /dummy
 
+RUN apt-get install -y vim nano
 
 CMD bash -c " cd /ilcsoft/v01-19-02/Eutelescope/master/ ; source build_env.sh ; cd - ; bash"
