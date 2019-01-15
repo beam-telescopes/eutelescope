@@ -88,7 +88,7 @@ void EUTelTripletGBLUtility::FindTriplets(std::vector<EUTelTripletGBLUtility::hi
     * current_multiplets : current set of the multiplets built with the already used planes
     * in_hits : all hits in the telescope for this event. The two indices are [ID plane][ID hits on the plane]
     ******/
-std::vector<eutelescope::EUTelTripletGBLUtility::multiplet> EUTelTripletGBLUtility::RecursiveMultipletBuilding(std::vector<eutelescope::EUTelTripletGBLUtility::multiplet> &current_multiplets, std::vector< std::vector<eutelescope::EUTelTripletGBLUtility::hit> >& in_hits)
+std::vector<eutelescope::EUTelTripletGBLUtility::multiplet> EUTelTripletGBLUtility::RecursiveMultipletBuilding(std::vector<eutelescope::EUTelTripletGBLUtility::multiplet> &current_multiplets, std::vector< std::vector<eutelescope::EUTelTripletGBLUtility::hit> >& in_hits, double multip_res_cut, double multip_slope_cut)
 {
 
     if(in_hits.size() == 2) { //Initial condition
@@ -108,18 +108,38 @@ std::vector<eutelescope::EUTelTripletGBLUtility::multiplet> EUTelTripletGBLUtili
             all_output_multiplets.push_back(current_multiplet_hits);
         }
         return all_output_multiplets;
-    } else { //Recursivityzation
+    } else { //Recursivityzation (by plane)
         std::vector<EUTelTripletGBLUtility::hit> current_plane_hits = in_hits.at(1);
         in_hits.erase(in_hits.begin() + 1);
             
-        std::vector<EUTelTripletGBLUtility::multiplet> sub_multiplet = RecursiveMultipletBuilding(current_multiplets, in_hits);
+        std::vector<EUTelTripletGBLUtility::multiplet> sub_multiplet = RecursiveMultipletBuilding(current_multiplets, in_hits, multip_res_cut, multip_slope_cut);
         
-        for(EUTelTripletGBLUtility::hit current_hit : current_plane_hits)
-        for(EUTelTripletGBLUtility::multiplet current_build_multiplet : sub_multiplet)
-        {
-            current_build_multiplet.add_hit(current_hit);
-            //--- TODO : Add some cuts here
-            //--- TODO Maybe : Add an option to check whether a plane is DUT ?
+        size_t id_max = sub_multiplet.size();
+        for(size_t id = 0 ; id < id_max ; id++) {
+            EUTelTripletGBLUtility::multiplet current_build_multiplet = sub_multiplet.at(id);
+            bool rm_multip = true;
+            
+            for(EUTelTripletGBLUtility::hit current_hit : current_plane_hits)
+            {
+                bool keep_hit = true;
+                keep_hit &= (current_build_multiplet.getdx(current_hit) < multip_res_cut);
+                keep_hit &= (current_build_multiplet.getdy(current_hit) < multip_res_cut);
+                keep_hit &= (current_build_multiplet.slope().x < multip_slope_cut);
+                keep_hit &= (current_build_multiplet.slope().y < multip_slope_cut);
+            
+                if(keep_hit) {
+                    current_build_multiplet.add_hit(current_hit);
+                    rm_multip = false;
+                }
+                
+                //--- TODO : What if more than one hit match ?
+                //--- TODO Maybe : Add an option to check whether a plane is DUT ?
+            }
+            if(rm_multip) { //No matching hit in one of the planes - rm the candidate track
+                sub_multiplet.erase(sub_multiplet.begin()+id);
+                id--; //Vector is 1 unit shorter
+                id_max--;
+            }
         }
         
         return sub_multiplet;
@@ -127,7 +147,7 @@ std::vector<eutelescope::EUTelTripletGBLUtility::multiplet> EUTelTripletGBLUtili
 }
 
 template<typename T>
-void EUTelTripletGBLUtility::FindMultiplets(std::vector<EUTelTripletGBLUtility::hit> const & hits, std::vector<T> const & multiplet_sensor_ids, double multip_res_cut, double multip_slope_cut, std::vector<EUTelTripletGBLUtility::multiplet> & found_multip, bool only_best_multiplet) 
+void EUTelTripletGBLUtility::FindMultiplets(std::vector<EUTelTripletGBLUtility::hit> const & hits, std::vector<T> const & multiplet_sensor_ids, double multip_res_cut, double multip_slope_cut, std::vector<EUTelTripletGBLUtility::multiplet> & found_multip) 
 {
   std::vector<unsigned> planes;
   for(unsigned current = 0 ; current < multiplet_sensor_ids.size() ; current++) 
@@ -142,7 +162,7 @@ void EUTelTripletGBLUtility::FindMultiplets(std::vector<EUTelTripletGBLUtility::
     }
 
     std::vector<EUTelTripletGBLUtility::multiplet> tmp;
-  found_multip = RecursiveMultipletBuilding(tmp, hits_by_plane);
+  found_multip = RecursiveMultipletBuilding(tmp, hits_by_plane, multip_res_cut, multip_slope_cut);
   //return multiplets;
 }
 
