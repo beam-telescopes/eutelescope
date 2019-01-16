@@ -144,7 +144,7 @@ public:
    class multiplet {
     public:
         multiplet();
-        multiplet(std::vector<hit> hits);
+        multiplet(std::vector<hit> inhits);
 
         // Keep track of linking status to DUT and REF:
         bool linked_dut;

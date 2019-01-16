@@ -381,6 +381,11 @@ EUTelTripletGBLUtility::multiplet::multiplet() : linked_dut(false), hits() {
   // Empty default constructor
 }
 
+EUTelTripletGBLUtility::multiplet::multiplet(std::vector<hit> inhits) : linked_dut(false), hits() {
+  // Empty default constructor
+    for(hit current_hit : inhits) add_hit(current_hit);
+}
+
 EUTelTripletGBLUtility::triplet::triplet(hit hit0, hit hit1, hit hit2) {
   std::vector<hit> inHits = {hit0, hit1, hit2};
   fillmultiplet(inHits);
